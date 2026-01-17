@@ -1,0 +1,35 @@
+name: Build MangaSlayer Only
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build MangaSlayer Extension
+        run: ./gradlew -p src/ar/mangaslayer assembleDebug
+
+      - name: Create Repository Index
+        run: |
+          ./gradlew createRepoIndex
+
+      - name: Deploy to Repo Branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repo
+          publish_branch: repo
+          user_name: 'GitHub Action'
+          user_email: 'action@github.com'
